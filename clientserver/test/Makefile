@@ -24,7 +24,7 @@ LDFLAGS   = -g -L..
 LDLIBS = -lclientserver
 
 # Targets
-PROGS = myserver myclient
+PROGS = myserver myclient testarticle
 
 all: $(PROGS)
 
@@ -32,6 +32,7 @@ all: $(PROGS)
 # The dependency on libclientserver.a is not defined.
 myserver: myserver.o
 myclient: myclient.o
+testarticle: testarticle.o
 
 SRC = $(wildcard *.cc)
 
@@ -47,6 +48,8 @@ distclean: clean
 	-rm $(SRC:.cc=.d)
 	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
 
+test: 
+	./testarticle
 
 
 # Include the *.d files
