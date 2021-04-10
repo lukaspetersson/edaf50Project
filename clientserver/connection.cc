@@ -41,6 +41,7 @@
 #include <sys/uio.h>    /* read(), write() */
 #include <unistd.h>     /* close(), read(), write() */
 
+#define no_socket = -1;
 bool Connection::ignoresPipeSignals = false;
 
 Connection::Connection()
@@ -60,6 +61,13 @@ Connection::Connection()
 
 Connection::Connection(const char* host, int port) : Connection()
 {
+
+        /* Throws exception if SIGPIPE is broken*/
+        if (!ignoresPipeSignals) {
+		signal(SIGPIPE, SIG_IGN);
+		ignoresPipeSignals = true;
+	}
+
         my_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (my_socket < 0) {
                 my_socket = no_socket;
@@ -118,12 +126,16 @@ unsigned char Connection::read() const
         if (count != 1) {
                 throw ConnectionClosedException();
         }
-        return data;
+return data;
 }
 
-void Connection::initConnection(int s) { my_socket = s; }
+void Connection::initConnection(int s) { 
+        my_socket = s; 
+}
 
-int Connection::getSocket() const { return my_socket; }
+int Connection::getSocket() const { 
+        return my_socket;
+ }
 
 void Connection::error(const char* msg) const
 {

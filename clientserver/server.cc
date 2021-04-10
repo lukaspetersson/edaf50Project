@@ -25,7 +25,6 @@
 // ------------------------------------------------------------------
 
 #include "server.h"
-
 #include "connection.h"
 
 #include <algorithm>
@@ -40,6 +39,8 @@
 
 Server::Server(int port)
 {
+        pending_socket = -1;
+        
         my_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (my_socket < 0) {
                 my_socket = Connection::no_socket;
