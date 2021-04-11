@@ -3,13 +3,30 @@
 #include "connectionclosedexception.h"
 #include "server.h"
 
+#include "article.h"
+#include "dbinterface.h" 
+
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
+
 using namespace std;
+
+
+
+//listNewsgroups
+//createNewsGroup
+//deleteNewsgroup
+//listArticlesInNewgroup
+
+//readArticle
+//writeArticle
+//deleteArticle
+//
+
 
 /*
  * Read an integer from a client.
@@ -56,6 +73,9 @@ Server init(int argc, char* argv[])
         }
         return server;
 }
+
+
+
 
 int main(int argc, char* argv[])
 {
