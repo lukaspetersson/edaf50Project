@@ -2,7 +2,6 @@
 #define ADBINTERFACE_H
 
 #include "article.h"
-#include "newsgroup.h"
 
 class ArticleDatabase {
     public: 
@@ -22,8 +21,8 @@ class ArticleDatabase {
         //Fetches a vector of all newsgroups in the database
         virtual std::vector<Newsgroup>& list_newsgroups() = 0;
 
-        //Store a newsgroup in the database, return true if success else false
-        virtual bool store_newsgroup(Newsgroup& newsgroup) = 0;
+        //Create a newsgroup in the database, return true if success else false
+        virtual bool create_newsgroup(unsigned int newsgroup_id, const std::string& name) = 0;
 
         //Deletes the given newsgroup, returns true if success else false
         virtual bool delete_newsgroup(unsigned int newsgroup_id) = 0;
