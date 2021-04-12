@@ -24,7 +24,7 @@ LDFLAGS   = -g -L..
 LDLIBS = -lclientserver
 
 # Targets
-PROGS = myserver myclient testarticle
+PROGS = myserver myclient testarticle dbtest
 
 all: $(PROGS)
 
@@ -33,6 +33,7 @@ all: $(PROGS)
 myserver: myserver.o
 myclient: myclient.o
 testarticle: testarticle.o
+dbtest: dbtest.o dbprimary.o
 
 SRC = $(wildcard *.cc)
 
@@ -50,6 +51,7 @@ distclean: clean
 
 test: 
 	./testarticle
+	./dbtest
 
 
 # Include the *.d files

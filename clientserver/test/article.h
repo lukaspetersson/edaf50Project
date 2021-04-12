@@ -1,6 +1,8 @@
 #ifndef ARTICLE_H
 #define ARTICLE_H
 
+#include <string>
+
 /*
 Article ojects keep track of the title, author and contents of an article.
 They also have an overloaded operator for comparing their title to strings
@@ -8,6 +10,7 @@ which means all titles in a newsgroup should be unique.
 */
 class Article {
     public:
+
         Article (const std::string& title, const std::string& author, const std::string& contents)
                 : title(title)
                 , author(author)
@@ -22,9 +25,10 @@ class Article {
             return title != this->title;
         }
 
-        const std::string title;
-        const std::string author;
-        const std::string contents; 
+        unsigned int id;
+        std::string title;
+        std::string author;
+        std::string contents; 
 };
 
 #endif

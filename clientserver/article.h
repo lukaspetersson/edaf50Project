@@ -8,9 +8,8 @@ which means all titles in a newsgroup should be unique.
 */
 class Article {
     public:
-        Article (const unsigned int id, const std::string& title, const std::string& author, const std::string& contents)
-                : id(id)
-                , title(title)
+        Article (const std::string& title, const std::string& author, const std::string& contents)
+                : title(title)
                 , author(author)
                 , contents(contents) {}
         
@@ -23,7 +22,7 @@ class Article {
             return title != this->title;
         }
 
-        const unsigned int id;
+        unsigned int id;
         const std::string title;
         const std::string author;
         const std::string contents; 

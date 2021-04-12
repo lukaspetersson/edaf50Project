@@ -22,10 +22,10 @@ class ArticleDatabase {
         virtual std::vector<Newsgroup>& list_newsgroups() = 0;
 
         //Create a newsgroup in the database, return true if success else false
-        virtual bool create_newsgroup(unsigned int newsgroup_id, const std::string& name) = 0;
+        virtual bool create_newsgroup(const std::string& name) = 0;
 
         //Deletes the given newsgroup, returns true if success else false
         virtual bool delete_newsgroup(unsigned int newsgroup_id) = 0;
-}
+};
 
 #endif
