@@ -202,7 +202,7 @@ void listArticlesInNewgroup(dbinterface& db){
                 sendCode(protocol::ANS_ACK);
                 sendString(article.title);
                 sendString(article.author);
-                sendString(article.text);
+                sendString(article.content);
                 )
 	}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
 				printError(conn);
