@@ -1,18 +1,21 @@
-#ifndef DBPRIMARY_H
-#define DBPRIMARY_H
+#ifndef DBDISK_H
+#define DBDISK_H
 
 #include "dbinterface.h"
 #include "article.h"
 
 
 /*
-This implementation of the database interface stores articles using a vector of newsgroups 
-which in turn contain a vector of articles.
+Stores article entries in  with the format: NEWSGROUP_ID | ARTICLE_ID | ARTICLE_TITLE | ARTICLE_AUTHOR | ARTICLE_CONTENTS
+Stores newsgroups on  with the format: NEWSGROUP_ID | NEWSGROUP_NAME
 */
-class ArticleDatabasePrimary : public ArticleDatabase {
+class ArticleDatabaseDisk : public ArticleDatabase {
     public:
+        ArticleDatabaseDisk(const std::string& ng_file, const std::string& ar_file) 
+        : ng_file(ng_file)
+        , ar_file(ar_file) {};
 
-        //Takes an article reference and stores it in a vector of newsgroups, return true if success else false
+        //Takes an article reference and stores it in a file on disk, return true if success else false
         bool store_article(Article& article, unsigned int newsgroup_id);
 
         //Takes a newsgroup id and an article id and returns the associated article or null if none was found
@@ -22,10 +25,10 @@ class ArticleDatabasePrimary : public ArticleDatabase {
         bool delete_article(unsigned int newsgroup_id, unsigned int article_id);
 
         //Fetches a vector of all articles in the given newsgroup, returns null if invalid newsgroup
-        const std::vector<Article> list_articles(unsigned int newsgroup_id);
+        const std::vector<Article> list_articles(unsigned int newsgroup_id) const;
 
         //Fetches a vector of all newsgroups in the database
-        const std::vector<Newsgroup>& list_newsgroups();
+        const std::vector<Newsgroup>& list_newsgroups() const;
 
         //Create a newsgroup in the database, return true if success else false
         bool create_newsgroup(const std::string& name);
@@ -34,7 +37,8 @@ class ArticleDatabasePrimary : public ArticleDatabase {
         bool delete_newsgroup(unsigned int newsgroup_id);
 
     private:
-        std::vector<Newsgroup> db;
+        std::string& ng_file; //Path to file that stores newsgroups
+        std::string& ar_file; //Path to file that stores articles
 };
 
 
