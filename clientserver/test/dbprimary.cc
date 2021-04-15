@@ -52,7 +52,7 @@ bool ArticleDatabasePrimary::create_newsgroup(const std::string& name) {
     return true;
 }
 
-const Article& ArticleDatabasePrimary::get_article(unsigned int newsgroup_id, unsigned int article_id) {
+const Article ArticleDatabasePrimary::get_article(unsigned int newsgroup_id, unsigned int article_id) {
     auto it1 = find_if(db.begin(), db.end(), [newsgroup_id](const Newsgroup& n){return n.id == newsgroup_id;});
 
     if(it1 == db.end()) {
@@ -102,7 +102,7 @@ const std::vector<Article> ArticleDatabasePrimary::list_articles(unsigned int ne
     return res.articles;
 }
 
-const std::vector<Newsgroup>& ArticleDatabasePrimary::list_newsgroups() {
+const std::vector<Newsgroup> ArticleDatabasePrimary::list_newsgroups() {
     std::sort(db.begin(), db.end(), ng_sorting_cond);
     return db;
 }

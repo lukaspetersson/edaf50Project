@@ -33,7 +33,7 @@ all: $(PROGS)
 myserver: myserver.o
 myclient: myclient.o
 testarticle: testarticle.o
-dbtest: dbtest.o dbprimary.o
+dbtest: dbtest.o dbprimary.o dbdisk.o
 
 SRC = $(wildcard *.cc)
 
@@ -49,7 +49,8 @@ distclean: clean
 	-rm $(SRC:.cc=.d)
 	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
 
-test: 
+test:
+	make
 	./testarticle
 	./dbtest
 

@@ -16,7 +16,7 @@ class ArticleDatabasePrimary : public ArticleDatabase {
         bool store_article(Article& article, unsigned int newsgroup_id);
 
         //Takes a newsgroup id and an article id and returns the associated article or null if none was found
-        const Article& get_article(unsigned int newsgroup_id, unsigned int article_id);
+        const Article get_article(unsigned int newsgroup_id, unsigned int article_id);
 
         //Deletes an article from the database, returns true if success else false
         bool delete_article(unsigned int newsgroup_id, unsigned int article_id);
@@ -25,7 +25,7 @@ class ArticleDatabasePrimary : public ArticleDatabase {
         const std::vector<Article> list_articles(unsigned int newsgroup_id);
 
         //Fetches a vector of all newsgroups in the database
-        const std::vector<Newsgroup>& list_newsgroups();
+        const std::vector<Newsgroup> list_newsgroups();
 
         //Create a newsgroup in the database, return true if success else false
         bool create_newsgroup(const std::string& name);
