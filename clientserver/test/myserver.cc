@@ -116,17 +116,17 @@ Server init(int argc, char* argv[])
 		sendCode(*conn,Protocol::ANS_END);
 
 	}
-	void listArticlesInNewgroup(ArticleDatabase& db, delete_newsgroup){
-		 auto newsgroupID = readNumber();
+	void listArticlesInNewgroup(ArticleDatabase& db, const shared_ptr<Connection>& conn){
+		 auto newsgroupID = readNumber(*conn);
 		 sendCode(*conn,Protocol::ANS_LIST_ART);
 		
-		auto articles = db.list_articles(newsgroupID, articleID)
+		auto articles = db.list_articles(newsgroupID);
 		if(articles.size() != 0){
 			sendCode(*conn,Protocol::ANS_ACK);
 
 			for (auto& article : articles) {
-			    writeNumber(article.id);
-			    writeNumber(article.title);
+			    writeNumber(*conn,article.id);
+			    writeString(conn, article.title);
 			}
 		}else{
 			sendCode(*conn,Protocol::ANS_NAK);
@@ -138,16 +138,16 @@ Server init(int argc, char* argv[])
 	}
 
 	void readArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
-		auto newsgroupID = readNumber();
-		auto articleID = readNumber();
+		auto newsgroupID = readNumber(*conn);
+		auto articleID = readNumber(*conn);
 		sendCode(*conn,Protocol::ANS_GET_ART);
 		int failstate = 0;
-		auto article = db.get_article(newsgroupID, articleID, failstate)
+		auto article = db.get_article(newsgroupID, articleID, failstate);
 		if(failstate == 0){
 			sendCode(*conn,Protocol::ANS_ACK);
-			writeString(article.title);
-			writeString(article.author);
-			writeString(article.content);
+			writeString(conn, article.title);
+			writeString(conn, article.author);
+			writeString(conn, article.contents);
 		}else {
 			sendCode(*conn,Protocol::ANS_NAK);
 			if(failstate == 1){
@@ -164,27 +164,27 @@ Server init(int argc, char* argv[])
 
 	void createNewsGroup(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
 		sendCode(*conn,Protocol::ANS_CREATE_NG);
-	      auto title = readString();
+	      auto title = readString(*conn);
 		bool ans = db.create_newsgroup(title);
 		if(ans){
 			sendCode(*conn,Protocol::ANS_ACK);
 
 		}else{
 			sendCode(*conn,Protocol::ANS_NAK);
-			sendCode(*conn,Protocol::ERR_NG_ALREADY_EXIST);
+			sendCode(*conn,Protocol::ERR_NG_ALREADY_EXISTS);
 		}
 		sendCode(*conn,Protocol::ANS_END);
 
 	}
 	void writeArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
-		//auto newsgroupID = readNUmber();
-		auto title = readString();
-		auto author = readString();
-		auto content= readString()
+		//auto newsgroupID = readNumber(*conn);
+		auto title = readString(*conn);
+		auto author = readString(*conn);
+		auto content= readString(*conn),
 	       
-	       Article newArticle = new Article(title, author, content);
+	       Article art = new Article(title, author, content);
 		sendCode(*conn,Protocol::ANS_CREATE_ART);
-		bool ans = db.store_article(newArticle, newsgroupID )
+		bool ans = db.store_article(art, newsgroupID )
 		if(ans){ 
 			sendCode(*conn,Protocol::ANS_ACK);
 			
@@ -195,8 +195,8 @@ Server init(int argc, char* argv[])
 		sendCode(*conn,Protocol::ANS_END);
 	}
 	void deleteArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
-		 auto newsgroupID = readNumber();
-		 auto articleID = readNumber();
+		 auto newsgroupID = readNumber(conn);
+		 auto articleID = readNumber(conn);
 		sendCode(*conn,Protocol::ANS_DELETE_ART);
 		int failstate = 0;
 
@@ -227,16 +227,26 @@ int main(int argc, char* argv[]){
                 auto conn = server.waitForActivity();
                 if (conn != nullptr) {
                         try {
-                                int    nbr = readNumber(conn);
-                                string result;
-                                if (nbr > 0) {
-                                        result = "positive";
-                                } else if (nbr == 0) {
-                                        result = "zero";
-                                } else {
-                                        result = "negative";
-                                }
-                                writeString(conn, result);
+                                 int    code = readNumber(*conn);
+                                
+                                switch (code) {
+                                case Protocol::COM_LIST_NG   : 
+			                listNewsgroups (db); break;
+                                case Protocol::COM_CREATE_NG :
+			                createNewsgroup(db); break;
+                                case Protocol::COM_DELETE_NG : 
+			                deleteNewsgroup(db); break;
+                                case Protocol::COM_LIST_ART  : 
+			                listArticles   (db); break;
+                                case Protocol::COM_CREATE_ART:
+			                 createArticle  (db); break;
+                                case Protocol::COM_DELETE_ART:
+			                 deleteArticle  (db); break;
+                                case Protocol::COM_GET_ART   :
+			                 readArticle     (db); break;
+		                 default: 
+								throw ConnectionClosedException();
+                                
                         } catch (ConnectionClosedException&) {
                                 server.deregisterConnection(conn);
                                 cout << "Client closed connection" << endl;
