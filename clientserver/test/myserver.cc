@@ -2,7 +2,7 @@
 #include "server.h"
 #include "article.h"
 #include "dbinterface.h"
-#include "connectionclosedexception"
+#include "connectionclosedexception.h"
 #include "protocol.h"
 
 #include "messageHandler.h"
@@ -27,19 +27,19 @@ using namespace std;
 //deleteArticle
 //
 
-void listNewsgroups(dbinterface&);
-void createNewsGroup(dbinterface&);
-void deleteNewsgroup(dbinterface&);
-void listArticlesInNewgroup(dbinterface&);
+void listNewsgroups(ArticleDatabase&, const shared_ptr<Connection>&);
+void createNewsGroup(ArticleDatabase&, const shared_ptr<Connection>&);
+void deleteNewsgroup(ArticleDatabase&, const shared_ptr<Connection>&);
+void listArticlesInNewgroup(ArticleDatabase&, const shared_ptr<Connection>&);
 
-void readArticle(dbinterface&);
-void createNewsGroup(dbinterface&);
-void writeArticle(dbinterface&);
-void deleteArticle(dbinterface&);
+void readArticle(ArticleDatabase&, const shared_ptr<Connection>&);
+void createNewsGroup(ArticleDatabase&, const shared_ptr<Connection>&);
+void writeArticle(ArticleDatabase&, const shared_ptr<Connection>&);
+void deleteArticle(ArticleDatabase&, const shared_ptr<Connection>&);
 
 /*
  * Read an integer from a client.
- */
+ 
 int readNumber(const shared_ptr<Connection>& conn)
 {
         unsigned char byte1 = conn->read();
@@ -49,9 +49,6 @@ int readNumber(const shared_ptr<Connection>& conn)
         return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
 }
 
-/*
- * Send a string to a client.
- */
 void writeString(const shared_ptr<Connection>& conn, const string& s)
 {
         for (char c : s) {
@@ -59,7 +56,7 @@ void writeString(const shared_ptr<Connection>& conn, const string& s)
         }
         conn->write('$');
 }
-
+*/
 Server init(int argc, char* argv[])
 {
         if (argc != 2) {
@@ -88,114 +85,140 @@ Server init(int argc, char* argv[])
 //________________________________________________________
 
 
-void listNewsgroups(dbinterface& db, const shared_ptr<Connection>& conn){
-    writeString(conn, static_cast<unsigned char>(Protocol::ANS_LIST_NG));
-    auto newsGroup = db.list_newsgroups();
+	void listNewsgroups(ArticleDatabase& db, const shared_ptr<Connection>& conn){
+	    auto newsGroup = db.list_newsgroups();
 
-    sendCode(Protocol::PAR_NUM); 
-    writeNumber(newgroup.size());
+		sendCode(*conn,Protocol::ANS_LIST_NG);
+	    writeNumber(*conn, newsGroup.size());
 
-    for(auto& news; newsgroup){
-        sendCode(Protocol::PAR_NUM); 
-        writeNumber(news.id);
+	    for(auto& news: newsGroup){
+		writeNumber(*conn, news.id);
+		writeString(conn, news.name );
+	    }
+		sendCode(*conn,Protocol::ANS_END);
+	}
 
-        sendCode(Protocol.PAR_STRING);
-        writeNumber(news.name.size())
-        writeString(conn, param )
-    }
+
+
+
+	void deleteNewsgroup(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
+		auto ngid = readNumber(*conn);
+		sendCode(*conn,Protocol::ANS_DELETE_NG);
+		unsigned char ans = db.delete_newsgroup(ngid);
+		
+		if(ans){ 
+			sendCode(*conn,Protocol::ANS_ACK);
+			
+		}else{
+			sendCode(*conn,Protocol::ANS_NAK);
+			sendCode(*conn,Protocol::ERR_NG_DOES_NOT_EXIST);
+		}
+		sendCode(*conn,Protocol::ANS_END);
+
+	}
+	void listArticlesInNewgroup(ArticleDatabase& db, delete_newsgroup){
+		 auto newsgroupID = readNumber();
+		 sendCode(*conn,Protocol::ANS_LIST_ART);
+		
+		auto articles = db.list_articles(newsgroupID, articleID)
+		if(articles.size() != 0){
+			sendCode(*conn,Protocol::ANS_ACK);
+
+			for (auto& article : articles) {
+			    writeNumber(article.id);
+			    writeNumber(article.title);
+			}
+		}else{
+			sendCode(*conn,Protocol::ANS_NAK);
+			sendCode(*conn,Protocol::ERR_NG_DOES_NOT_EXIST);
+
+		}
+		       
+		sendCode(*conn,Protocol::ANS_END);
+	}
+
+	void readArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
+		auto newsgroupID = readNumber();
+		auto articleID = readNumber();
+		sendCode(*conn,Protocol::ANS_GET_ART);
+		int failstate = 0;
+		auto article = db.get_article(newsgroupID, articleID, failstate)
+		if(failstate == 0){
+			sendCode(*conn,Protocol::ANS_ACK);
+			writeString(article.title);
+			writeString(article.author);
+			writeString(article.content);
+		}else {
+			sendCode(*conn,Protocol::ANS_NAK);
+			if(failstate == 1){
+				sendCode(*conn,Protocol::ERR_NG_DOES_NOT_EXIST);
+			}else if(failstate == 2){
+				sendCode(*conn,Protocol::ERR_ART_DOES_NOT_EXIST);
+			}
+
+		}
+		sendCode(*conn,Protocol::ANS_END);
+
+	}
+
+
+	void createNewsGroup(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
+		sendCode(*conn,Protocol::ANS_CREATE_NG);
+	      auto title = readString();
+		bool ans = db.create_newsgroup(title);
+		if(ans){
+			sendCode(*conn,Protocol::ANS_ACK);
+
+		}else{
+			sendCode(*conn,Protocol::ANS_NAK);
+			sendCode(*conn,Protocol::ERR_NG_ALREADY_EXIST);
+		}
+		sendCode(*conn,Protocol::ANS_END);
+
+	}
+	void writeArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
+		//auto newsgroupID = readNUmber();
+		auto title = readString();
+		auto author = readString();
+		auto content= readString()
+	       
+	       Article newArticle = new Article(title, author, content);
+		sendCode(*conn,Protocol::ANS_CREATE_ART);
+		bool ans = db.store_article(newArticle, newsgroupID )
+		if(ans){ 
+			sendCode(*conn,Protocol::ANS_ACK);
+			
+		}else{
+			sendCode(*conn,Protocol::ANS_NAK);
+			sendCode(*conn,Protocol::ERR_NG_DOES_NOT_EXIST);
+		}
+		sendCode(*conn,Protocol::ANS_END);
+	}
+	void deleteArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
+		 auto newsgroupID = readNumber();
+		 auto articleID = readNumber();
+		sendCode(*conn,Protocol::ANS_DELETE_ART);
+		int failstate = 0;
+
+		db.delete_article(newsgroupID, articleID, failstate);
+		if(failstate == 0){
+			sendCode(*conn,Protocol::ANS_ACK);
+		}else {
+			sendCode(*conn,Protocol::ANS_NAK);
+			if(failstate == 1){
+				sendCode(*conn,Protocol::ERR_NG_DOES_NOT_EXIST);
+			}else if(failstate == 2){
+				sendCode(*conn,Protocol::ERR_ART_DOES_NOT_EXIST);
+			}
+
+		}
+		sendCode(*conn,Protocol::ANS_END);
+
 }
 
 
 
-
-void deleteNewsgroup(dbinterface& db,  const shared_ptr<Connection>& conn){
-        auto ngid = readNumber();
-        unsigned char ans = sendCode(Protocol::ANS_DELETE_NG);
-        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				db.delete_newsgroup(ngid)
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}       
-
-}
-void listArticlesInNewgroup(dbinterface& db, delete_newsgroup){
-         auto newsgroupID = readNumber();
-         auto articleID = readNumber();
-        unsigned char ans = sendCode(Protocol::ANS_GET_ART);
-        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-                auto articles = db.list_articles(newsgroupID, articleID
-                for (auto& article : articles) {
-            writeNumber(article.id);
-            writeNumber(article.title);
-        }
-                )
-	}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-
-}
-
-void readArticle(dbinterface& db,  const shared_ptr<Connection>& conn){
-        auto newsgroupID = readNumber();
-        auto articleID = readNumber();
-        unsigned char ans = sendCode(Protocol::ANS_GET_ART);
-
-        sendCode(Protocol::ANS_GET_ART);
-
-        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-                auto article = db.get_article(newsgroupID, articleID
-                sendCode(protocol::ANS_ACK);
-                writeString(article.title);
-                writeString(article.author);
-                writeString(article.content);
-                )
-	}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-
-}
-
-
-}
-void createNewsGroup(dbinterface& db,  const shared_ptr<Connection>& conn){
-      auto title = readString();
-        unsigned char ans = sendCode(Protocol::ANS_CREATE_NG);
-        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				db.create_newsgroup(title)
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}   
-
-}
-void writeArticle(dbinterface& db,  const shared_ptr<Connection>& conn){
-        //auto newsgroupID = readNUmber();
-        auto id = readNumber()
-        auto title = readString();
-        auto author = readString();
-        auto content= readString()
-       
-       Article newArticle = new Article(title, author, content)
-       newArticle.id = id;
-        unsigned char ans = sendCode(Protocol::ANS_CREATE_NG);
-        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				db.store_article(newArticle, newsgroupID )
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}   
-}
-void deleteArticle(dbinterface& db,  const shared_ptr<Connection>& conn){
-         auto newsgroupID = readNumber();
-         auto articleID = readNumber();
-
-        unsigned char ans = sendCode(Protocol::ANS_DELETE_ART);
-        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				db.delete_article(newsgroupID, articleID)
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}  
-}
-
-
-
-
+//TODO
 int main(int argc, char* argv[]){
 
    auto server = init(argc, argv);

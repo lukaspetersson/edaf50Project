@@ -41,7 +41,6 @@
 #include <sys/uio.h>    /* read(), write() */
 #include <unistd.h>     /* close(), read(), write() */
 
-#define no_socket = -1;
 bool Connection::ignoresPipeSignals = false;
 
 Connection::Connection()
