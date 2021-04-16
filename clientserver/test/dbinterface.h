@@ -17,7 +17,7 @@ class ArticleDatabase {
         virtual bool store_article(Article& article, unsigned int newsgroup_id) = 0;
 
         //Takes a newsgroup id and an article id and returns the associated article or null if none was found
-        virtual const Article get_article(unsigned int newsgroup_id, unsigned int article_id) = 0;
+        virtual const Article get_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) = 0;
 
         //Deletes an article from the database, returns true if success else false
         virtual bool delete_article(unsigned int newsgroup_id, unsigned int article_id) = 0;

@@ -27,8 +27,10 @@ void test_primary_db() {
     success &= db.list_newsgroups()[0].id == 1;
     success &= db.delete_newsgroup(2);
     success &= db.list_newsgroups().size() == 1;
-
-    success &= db.get_article(1, 3).id == 3;
+    
+    int failsafe = 0;
+    success &= db.get_article(1, 3, failsafe).id == 3;
+    success &= !failsafe;
 
     if(success) {
         cout << "Primary database tests passed" << endl;
@@ -77,10 +79,11 @@ void test_disk_db() {
 
     const std::vector<Newsgroup>& ngs2 = db.list_newsgroups();
     const std::vector<Article>& ars2 = db.list_articles(ngs2[1].id);
-
-    Article atest = db.get_article(ngs2[1].id, ars2[1].id);
+    int failstate = 0;
+    Article atest = db.get_article(ngs2[1].id, ars2[1].id, failstate);
 
     success &= atest.title == "a2" && atest.id == 9;
+    success &= !failstate;
 
     success &= db.delete_newsgroup(ngs2[0].id);
     success &= db.list_newsgroups().size() == 1;

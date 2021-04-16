@@ -73,11 +73,13 @@ bool ArticleDatabaseDisk::create_newsgroup(const std::string& name) {
     return true;
 }
 
-const Article ArticleDatabaseDisk::get_article(unsigned int newsgroup_id, unsigned int article_id) {
+const Article ArticleDatabaseDisk::get_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) {
     fstream ar_db;
     std::string line;
     unsigned int ng_id, ar_id;
     Article a;
+
+    bool ng_found = false;
 
     ar_db.open(ar_file, fstream::in);
 
@@ -88,6 +90,7 @@ const Article ArticleDatabaseDisk::get_article(unsigned int newsgroup_id, unsign
         ss2 >> ng_id;      
 
         if(ng_id == newsgroup_id) {
+            ng_found = true;
             ss2.clear();
             ss2 << read_field(ss1);
             ss2 >> ar_id;
@@ -102,6 +105,12 @@ const Article ArticleDatabaseDisk::get_article(unsigned int newsgroup_id, unsign
         }
     }
     ar_db.close();
+
+    if(!ng_found) {
+        failstate = 1;
+    } else {
+        failstate = 2;
+    }
 
     return a;
 }
