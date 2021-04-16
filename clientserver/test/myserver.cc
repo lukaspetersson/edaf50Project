@@ -1,10 +1,12 @@
-/* myserver.cc: sample server program */
 #include "connection.h"
-#include "connectionclosedexception.h"
 #include "server.h"
-
 #include "article.h"
-#include "dbinterface.h" 
+#include "dbinterface.h"
+#include "connectionclosedexception"
+#include "protocol.h"
+
+#include "messageHandler.h"
+
 
 #include <cstdlib>
 #include <iostream>
@@ -12,10 +14,8 @@
 #include <stdexcept>
 #include <string>
 
-
 using namespace std;
-
-
+#include <iostream>
 
 //listNewsgroups
 //createNewsGroup
@@ -27,6 +27,15 @@ using namespace std;
 //deleteArticle
 //
 
+void listNewsgroups(dbinterface&);
+void createNewsGroup(dbinterface&);
+void deleteNewsgroup(dbinterface&);
+void listArticlesInNewgroup(dbinterface&);
+
+void readArticle(dbinterface&);
+void createNewsGroup(dbinterface&);
+void writeArticle(dbinterface&);
+void deleteArticle(dbinterface&);
 
 /*
  * Read an integer from a client.
@@ -73,13 +82,123 @@ Server init(int argc, char* argv[])
         }
         return server;
 }
+//________________________________________________________
+
+
+//________________________________________________________
+
+
+void listNewsgroups(dbinterface& db, const shared_ptr<Connection>& conn){
+    writeString(conn, static_cast<unsigned char>(Protocol::ANS_LIST_NG));
+    auto newsGroup = db.list_newsgroups();
+
+    sendCode(Protocol::PAR_NUM); 
+    writeNumber(newgroup.size());
+
+    for(auto& news; newsgroup){
+        sendCode(Protocol::PAR_NUM); 
+        writeNumber(news.id);
+
+        sendCode(Protocol.PAR_STRING);
+        writeNumber(news.name.size())
+        writeString(conn, param )
+    }
+}
 
 
 
 
-int main(int argc, char* argv[])
-{
-        auto server = init(argc, argv);
+void deleteNewsgroup(dbinterface& db,  const shared_ptr<Connection>& conn){
+        auto ngid = readNumber();
+        unsigned char ans = sendCode(Protocol::ANS_DELETE_NG);
+        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+				db.delete_newsgroup(ngid)
+			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+				printError(conn);
+			}       
+
+}
+void listArticlesInNewgroup(dbinterface& db, delete_newsgroup){
+         auto newsgroupID = readNumber();
+         auto articleID = readNumber();
+        unsigned char ans = sendCode(Protocol::ANS_GET_ART);
+        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+                auto articles = db.list_articles(newsgroupID, articleID
+                for (auto& article : articles) {
+            writeNumber(article.id);
+            writeNumber(article.title);
+        }
+                )
+	}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+				printError(conn);
+
+}
+
+void readArticle(dbinterface& db,  const shared_ptr<Connection>& conn){
+        auto newsgroupID = readNumber();
+        auto articleID = readNumber();
+        unsigned char ans = sendCode(Protocol::ANS_GET_ART);
+
+        sendCode(Protocol::ANS_GET_ART);
+
+        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+                auto article = db.get_article(newsgroupID, articleID
+                sendCode(protocol::ANS_ACK);
+                writeString(article.title);
+                writeString(article.author);
+                writeString(article.content);
+                )
+	}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+				printError(conn);
+
+}
+
+
+}
+void createNewsGroup(dbinterface& db,  const shared_ptr<Connection>& conn){
+      auto title = readString();
+        unsigned char ans = sendCode(Protocol::ANS_CREATE_NG);
+        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+				db.create_newsgroup(title)
+			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+				printError(conn);
+			}   
+
+}
+void writeArticle(dbinterface& db,  const shared_ptr<Connection>& conn){
+        //auto newsgroupID = readNUmber();
+        auto id = readNumber()
+        auto title = readString();
+        auto author = readString();
+        auto content= readString()
+       
+       Article newArticle = new Article(title, author, content)
+       newArticle.id = id;
+        unsigned char ans = sendCode(Protocol::ANS_CREATE_NG);
+        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+				db.store_article(newArticle, newsgroupID )
+			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+				printError(conn);
+			}   
+}
+void deleteArticle(dbinterface& db,  const shared_ptr<Connection>& conn){
+         auto newsgroupID = readNumber();
+         auto articleID = readNumber();
+
+        unsigned char ans = sendCode(Protocol::ANS_DELETE_ART);
+        if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+				db.delete_article(newsgroupID, articleID)
+			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+				printError(conn);
+			}  
+}
+
+
+
+
+int main(int argc, char* argv[]){
+
+   auto server = init(argc, argv);
 
         while (true) {
                 auto conn = server.waitForActivity();
@@ -106,4 +225,9 @@ int main(int argc, char* argv[])
                 }
         }
         return 0;
+
+
 }
+
+
+
