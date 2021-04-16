@@ -20,7 +20,7 @@ class ArticleDatabase {
         virtual const Article get_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) = 0;
 
         //Deletes an article from the database, returns true if success else false
-        virtual bool delete_article(unsigned int newsgroup_id, unsigned int article_id) = 0;
+        virtual bool delete_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) = 0;
 
         //Fetches a vector of all articles in the given newsgroup, returns null if invalid newsgroup
         virtual const std::vector<Article> list_articles(unsigned int newsgroup_id) = 0;

@@ -115,12 +115,13 @@ const Article ArticleDatabaseDisk::get_article(unsigned int newsgroup_id, unsign
     return a;
 }
 
-bool ArticleDatabaseDisk::delete_article(unsigned int newsgroup_id, unsigned int article_id) {
+bool ArticleDatabaseDisk::delete_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) {
     bool success = false;
     fstream ar_db, tmp;
     std::string line;
     std::stringstream ss;
     unsigned int ng_id, ar_id;
+    bool ng_found = false;
 
     ar_db.open(ar_file, fstream::in);
     tmp.open("tmp", fstream::out | fstream::app);
@@ -131,6 +132,7 @@ bool ArticleDatabaseDisk::delete_article(unsigned int newsgroup_id, unsigned int
         if(ng_id == newsgroup_id) {
             read_field(ss);
             ss >> ar_id;
+            ng_found = true;
             if(ar_id == article_id) {
                 success = true;
                 continue;
@@ -145,6 +147,12 @@ bool ArticleDatabaseDisk::delete_article(unsigned int newsgroup_id, unsigned int
 
     remove(ar_file.c_str());
     rename("tmp", ar_file.c_str());
+
+    if(!ng_found) {
+        failstate = 1;
+    } else if(!success) {
+        failstate = 2;
+    }
 
     return success;
 }

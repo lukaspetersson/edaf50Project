@@ -25,7 +25,7 @@ class ArticleDatabaseDisk : public ArticleDatabase {
         const Article get_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate);
 
         //Deletes an article from the database, returns true if success else false
-        bool delete_article(unsigned int newsgroup_id, unsigned int article_id);
+        bool delete_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate);
 
         //Fetches a vector of all articles in the given newsgroup, returns null if invalid newsgroup
         const std::vector<Article> list_articles(unsigned int newsgroup_id);

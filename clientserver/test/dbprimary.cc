@@ -69,10 +69,11 @@ const Article ArticleDatabasePrimary::get_article(unsigned int newsgroup_id, uns
     return *it2;
 }
 
-bool ArticleDatabasePrimary::delete_article(unsigned int newsgroup_id, unsigned int article_id) {
+bool ArticleDatabasePrimary::delete_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) {
     auto it1 = find_if(db.begin(), db.end(), [newsgroup_id](const Newsgroup& n){return n.id == newsgroup_id;});
 
     if(it1 == db.end()) {
+        failstate = 1;
         cout << "ERROR: Newsgroup with id " << newsgroup_id << " not found!" << endl;
         return false;
     }
@@ -82,6 +83,7 @@ bool ArticleDatabasePrimary::delete_article(unsigned int newsgroup_id, unsigned 
     auto it2 = find_if(ng.articles.begin(), ng.articles.end(), [article_id](const Article& a){return a.id == article_id;});
 
     if(it2 == ng.articles.end()) {
+        failstate = 2;
         cout << "ERROR: Article with id " << article_id << " not found in newsgroup with id " << newsgroup_id << '!' << endl;
         return false;
     }

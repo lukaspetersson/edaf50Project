@@ -16,10 +16,13 @@ void test_primary_db() {
 
     Article a1("a1", "Alice", "Hello world!");
 
+    int failsafe = 0;
+
     success &= db.store_article(a1, 1);
     success &= db.store_article(a1, 2);
 
-    success &= db.delete_article(2, 4);
+    success &= db.delete_article(2, 4, failsafe);
+    success &= !failsafe;
 
     success &= db.list_articles(2).size() == 0;
 
@@ -28,7 +31,7 @@ void test_primary_db() {
     success &= db.delete_newsgroup(2);
     success &= db.list_newsgroups().size() == 1;
     
-    int failsafe = 0;
+    failsafe = 0;
     success &= db.get_article(1, 3, failsafe).id == 3;
     success &= !failsafe;
 
@@ -56,6 +59,8 @@ void test_disk_db() {
     success &= db.create_newsgroup("News1");
     success &= db.create_newsgroup("News2");
 
+    int failstate = 0;
+
     const std::vector<Newsgroup>& ngs = db.list_newsgroups();
 
     success &= ngs[0].name == "News1";
@@ -70,7 +75,8 @@ void test_disk_db() {
     success &= ars[0].title =="a1";
     success &= ars[1].id == 7;
 
-    success &= db.delete_article(4, 6);
+    success &= db.delete_article(4, 6, failstate);
+    success &= !failstate;
     success &= db.list_articles(4).size() == 1;
 
     success &= db.store_article(a2, 5);
@@ -79,7 +85,7 @@ void test_disk_db() {
 
     const std::vector<Newsgroup>& ngs2 = db.list_newsgroups();
     const std::vector<Article>& ars2 = db.list_articles(ngs2[1].id);
-    int failstate = 0;
+    failstate = 0;
     Article atest = db.get_article(ngs2[1].id, ars2[1].id, failstate);
 
     success &= atest.title == "a2" && atest.id == 9;
