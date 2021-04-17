@@ -4,8 +4,9 @@
 #include "dbinterface.h"
 #include "connectionclosedexception.h"
 #include "protocol.h"
-
+#include "dbdisk.h"
 #include "messageHandler.h"
+#include "dbprimary.h"
 
 
 #include <cstdlib>
@@ -15,12 +16,13 @@
 #include <string>
 
 using namespace std;
+
 #include <iostream>
 
 //listNewsgroups
-//createNewsGroup
+//createNewsgroup
 //deleteNewsgroup
-//listArticlesInNewgroup
+//listArticles
 
 //readArticle
 //writeArticle
@@ -28,12 +30,12 @@ using namespace std;
 //
 
 void listNewsgroups(ArticleDatabase&, const shared_ptr<Connection>&);
-void createNewsGroup(ArticleDatabase&, const shared_ptr<Connection>&);
+void createNewsgroup(ArticleDatabase&, const shared_ptr<Connection>&);
 void deleteNewsgroup(ArticleDatabase&, const shared_ptr<Connection>&);
-void listArticlesInNewgroup(ArticleDatabase&, const shared_ptr<Connection>&);
+void listArticles(ArticleDatabase&, const shared_ptr<Connection>&);
 
 void readArticle(ArticleDatabase&, const shared_ptr<Connection>&);
-void createNewsGroup(ArticleDatabase&, const shared_ptr<Connection>&);
+void createNewsgroup(ArticleDatabase&, const shared_ptr<Connection>&);
 void writeArticle(ArticleDatabase&, const shared_ptr<Connection>&);
 void deleteArticle(ArticleDatabase&, const shared_ptr<Connection>&);
 
@@ -79,10 +81,6 @@ Server init(int argc, char* argv[])
         }
         return server;
 }
-//________________________________________________________
-
-
-//________________________________________________________
 
 
 	void listNewsgroups(ArticleDatabase& db, const shared_ptr<Connection>& conn){
@@ -116,7 +114,7 @@ Server init(int argc, char* argv[])
 		sendCode(*conn,Protocol::ANS_END);
 
 	}
-	void listArticlesInNewgroup(ArticleDatabase& db, const shared_ptr<Connection>& conn){
+	void listArticles(ArticleDatabase& db, const shared_ptr<Connection>& conn){
 		 auto newsgroupID = readNumber(*conn);
 		 sendCode(*conn,Protocol::ANS_LIST_ART);
 		
@@ -162,7 +160,7 @@ Server init(int argc, char* argv[])
 	}
 
 
-	void createNewsGroup(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
+	void createNewsgroup(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
 		sendCode(*conn,Protocol::ANS_CREATE_NG);
 	      auto title = readString(*conn);
 		bool ans = db.create_newsgroup(title);
@@ -176,15 +174,17 @@ Server init(int argc, char* argv[])
 		sendCode(*conn,Protocol::ANS_END);
 
 	}
+
+	/*
 	void writeArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
-		//auto newsgroupID = readNumber(*conn);
-		auto title = readString(*conn);
-		auto author = readString(*conn);
-		auto content= readString(*conn),
+		int newsgroupID = readNumber(*conn);
+		string title = readString(*conn);
+		string author = readString(*conn);
+		string content= readString(*conn),
 	       
-	       Article art = new Article(title, author, content);
+	    Article newart(title, author, content) 
 		sendCode(*conn,Protocol::ANS_CREATE_ART);
-		bool ans = db.store_article(art, newsgroupID )
+		bool ans = db.store_article(newart, newsgroupID )
 		if(ans){ 
 			sendCode(*conn,Protocol::ANS_ACK);
 			
@@ -194,9 +194,11 @@ Server init(int argc, char* argv[])
 		}
 		sendCode(*conn,Protocol::ANS_END);
 	}
+*/
+
 	void deleteArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
-		 auto newsgroupID = readNumber(conn);
-		 auto articleID = readNumber(conn);
+		 auto newsgroupID = readNumber(*conn);
+		 auto articleID = readNumber(*conn);
 		sendCode(*conn,Protocol::ANS_DELETE_ART);
 		int failstate = 0;
 
@@ -221,37 +223,44 @@ Server init(int argc, char* argv[])
 //TODO
 int main(int argc, char* argv[]){
 
+
    auto server = init(argc, argv);
+
+   ArticleDatabasePrimary db;
+   
 
         while (true) {
                 auto conn = server.waitForActivity();
                 if (conn != nullptr) {
                         try {
-                                 int    code = readNumber(*conn);
+                                 int  code = readNumber(*conn);
                                 
                                 switch (code) {
-                                case Protocol::COM_LIST_NG   : 
-			                listNewsgroups (db); break;
-                                case Protocol::COM_CREATE_NG :
-			                createNewsgroup(db); break;
-                                case Protocol::COM_DELETE_NG : 
-			                deleteNewsgroup(db); break;
-                                case Protocol::COM_LIST_ART  : 
-			                listArticles   (db); break;
-                                case Protocol::COM_CREATE_ART:
-			                 createArticle  (db); break;
-                                case Protocol::COM_DELETE_ART:
-			                 deleteArticle  (db); break;
-                                case Protocol::COM_GET_ART   :
-			                 readArticle     (db); break;
+                                case static_cast<int>(Protocol::COM_LIST_NG)   : 
+			                listNewsgroups(db, conn); break;
+                                case static_cast<int>(Protocol::COM_CREATE_NG) :
+			                createNewsgroup(db, conn); break;
+                                case static_cast<int>(Protocol::COM_DELETE_NG) : 
+			                deleteNewsgroup(db, conn); break;
+                                case static_cast<int>(Protocol::COM_LIST_ART)  : 
+			                listArticles(db, conn); break;
+                                case static_cast<int>(Protocol::COM_CREATE_ART):
+			                 writeArticle(db, conn); break;
+                                case static_cast<int>(Protocol::COM_DELETE_ART):
+			                 deleteArticle(db, conn); break;
+                                case static_cast<int>(Protocol::COM_GET_ART)   :
+			                 readArticle(db, conn); break;
 		                 default: 
 								throw ConnectionClosedException();
                                 
-                        } catch (ConnectionClosedException&) {
+                        
+                			}
+
+						}catch(ConnectionClosedException&) {
                                 server.deregisterConnection(conn);
                                 cout << "Client closed connection" << endl;
                         }
-                } else {
+				}else{
                         conn = make_shared<Connection>();
                         server.registerConnection(conn);
                         cout << "New client connects" << endl;
