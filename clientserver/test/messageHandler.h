@@ -52,14 +52,18 @@ string readString(const Connection& conn){
 }
 
 // write string_p
-void writeString(const shared_ptr<Connection>& conn, string s){
-	    conn->write(static_cast<int>(Protocol::PAR_STRING));
+void writeString(const Connection& conn, string s){
+	    conn.write(static_cast<int>(Protocol::PAR_STRING));
 	    int len = s.size();
-            conn->write((len >> 24) & 0xFF);
-            conn->write((len >> 16) & 0xFF);
-	    conn->write((len >> 8) & 0xFF);
-	    conn->write(len & 0xFF);
-	    for(char c : s)conn->write(c);
+            conn.write((len >> 24) & 0xFF);
+            conn.write((len >> 16) & 0xFF);
+	    conn.write((len >> 8) & 0xFF);
+	    conn.write(len & 0xFF);
+	    for(char c : s)conn.write(c);
+}
+// write string_p
+void writeString(const shared_ptr<Connection>& conn, string s){
+	    writeString(*conn, s);
 }
 
 // write num_p

@@ -1,7 +1,7 @@
 /* myclient.cc: sample client program */
 #include "connection.h"
 #include "connectionclosedexception.h"
-#include "Protocol.h"
+#include "protocol.h"
 #include "messageHandler.h"
 
 #include <cstdlib>
@@ -15,64 +15,62 @@ void write(const Connection& conn, int com_num){
 	//write commandbyte
 	conn.write(com_num & 0xFF);
 	//write parameter
-	switch(com_num) {
-		case static_cast<int>(Protocol::COM_LIST_NG):
-		     //list newsgroups
-		     //no parameters
-		break;
-		case static_cast<int>(Protocol::COM_CREATE_NG):
-		    //create new newsgroup
-		    //parameter: string title
-		    string title;
-		    getline(cin, title);
-		    writeString(conn, title);
-		break;
-		case static_cast<int>(Protocol::COM_DELETE_NG):
-		    //delete newsgroup
-		    //parameter: int ID
-		    int id;
-		    cin >> id;
-		    writeNumber(id);
-		break;
-		case static_cast<int>(Protocol::COM_LIST_ART):
-		    //list articles
-		    //parameter: int ID
-		    int id;
-		    cin >> id;
-		    writeNumber(id);
-		break;
-		case static_cast<int>(Protocol::COM_CREATE_ART):
-		    //create article
-		    //parameters: int ID, string title, string author, string text
-		    int id;
-		    cin >> id;
-		    writeNumber(id);
-		    string line;
-		    getline(cin, line);
-		    writeString(conn, line);
-		    getline(cin, title);
-		    writeString(conn, line);
-		    getline(cin, line);
-		    writeString(conn,line);
-		break;
-		case static_cast<int>(Protocol::COM_DELETE_ART):
-		    //delete article
-		    //parameters: int ID, int ID
-		    int id;
-		    cin >> id;
-		    writeNumber(id);
-		    cin >> id;
-		    writeNumber(id);
-		break;
-		case static_cast<int>(Protocol::COM_GET_ART):
-		    //get article
-		    //parameters: int ID, int ID
-		    int id;
-		    cin >> id;
-		    writeNumber(id);
-		    cin >> id;
-		    writeNumber(id);
-		break;
+	if(com_num ==static_cast<int>(Protocol::COM_LIST_NG)){
+	     //list newsgroups
+	     //no parameters
+	}
+	else if(com_num ==static_cast<int>(Protocol::COM_CREATE_NG)){
+	    //create new newsgroup
+	    //parameter: string title
+	    string title;
+	    getline(cin, title);
+	    writeString(conn, title);
+	}
+	else if(com_num ==static_cast<int>(Protocol::COM_DELETE_NG)){
+	    //delete newsgroup
+	    //parameter: int ID
+	    int id;
+	    cin >> id;
+	    writeNumber(conn, id);
+	}
+	else if(com_num ==static_cast<int>(Protocol::COM_LIST_ART)){
+	    //list articles
+	    //parameter: int ID
+	    int id;
+	    cin >> id;
+	    writeNumber(conn, id);
+	}
+	else if(com_num ==static_cast<int>(Protocol::COM_CREATE_ART)){
+	    //create article
+	    //parameters: int ID, string title, string author, string text
+	    int id;
+	    cin >> id;
+	    writeNumber(conn, id);
+	    string line;
+	    getline(cin, line);
+	    writeString(conn, line);
+	    getline(cin, line);
+	    writeString(conn, line);
+	    getline(cin, line);
+	    writeString(conn,line);
+	}
+	else if(com_num ==static_cast<int>(Protocol::COM_DELETE_ART)){
+	    //delete article
+	    //parameters: int ID, int ID
+	    int id;
+	    cin >> id;
+	    writeNumber(conn, id);
+	    cin >> id;
+	    writeNumber(conn, id);
+	}
+	else if(com_num ==static_cast<int>(Protocol::COM_GET_ART)){
+	    //get article
+	    //parameters: int ID, int ID
+	    int id;
+	    cin >> id;
+	    writeNumber(conn, id);
+	    cin >> id;
+	    writeNumber(conn, id);
 	}
 	//write endbyte
 	conn.write(static_cast<int>(Protocol::COM_END) & 0xFF);
@@ -91,7 +89,7 @@ void writeString(const Connection& conn, string s){
 }
 
 // write num_p
-void writeNumber(const Connection& conn, int value){
+void writeNumber(conn, const Connection& conn, int value){
 	conn.write(static_cast<int>(Protocol::PAR_NUM));
         conn.write((value >> 24) & 0xFF);
         conn.write((value >> 16) & 0xFF);
@@ -100,72 +98,70 @@ void writeNumber(const Connection& conn, int value){
 }
 */
 void read(const Connection& conn){
-	char ans_num{conn.read()};
-	switch(ans_num) {
-		case static_cast<int>(Protocol::ANS_LIST_NG):
-			int num_ng = readNumber(conn);
-			for(int i = 0; i != num_ng; i++){
+	unsigned char com_num{conn.read()};
+	if(com_num ==static_cast<int>(Protocol::ANS_LIST_NG)){
+		int num_ng = readNumber(conn);
+		for(int i = 0; i != num_ng; i++){
+			int id = readNumber(conn);
+			string title = readString(conn);
+			cout<<"ID: "<<id<<", TITLE: "<<title<<endl;
+		}	
+	}
+	else if(com_num ==static_cast<int>(Protocol::ANS_CREATE_NG)){
+		unsigned char ans = conn.read();
+		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+			cout<<"News group added"<<endl;
+		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+			printError(conn);
+		}
+	}
+	else if(com_num ==static_cast<int>(Protocol::ANS_DELETE_NG)){
+		unsigned char ans = conn.read();
+		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+			cout<<"News group deleted"<<endl;
+		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+			printError(conn);
+		}
+	}
+	else if(com_num ==static_cast<int>(Protocol::ANS_LIST_ART)){
+		unsigned char ans = conn.read();
+		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+			int num_art = readNumber(conn);
+			for(int i = 0; i != num_art; i++){
 				int id = readNumber(conn);
-				string title = readNumber(conn);
+				string title = readString(conn);
 				cout<<"ID: "<<id<<", TITLE: "<<title<<endl;
 			}	
-		break;
-		case static_cast<int>(Protocol::ANS_CREATE_NG):
-			unsigned char ans = conn.read();
-			if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				cout<<"News group added"<<endl;
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}
-		break;
-		case static_cast<int>(Protocol::ANS_DELETE_NG):
-			unsigned char ans = conn.read();
-			if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				cout<<"News group deleted"<<endl;
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}
-		break;
-		case static_cast<int>(Protocol::ANS_LIST_ART):
-			unsigned char ans = conn.read();
-			if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				int num_art = readNumber(conn);
-				for(int i = 0; i != num_art; i++){
-					int id = readNumber(conn);
-					string title = readNumber(conn);
-					cout<<"ID: "<<id<<", TITLE: "<<title<<endl;
-				}	
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}
-		break;
-		case static_cast<int>(Protocol::ANS_CREATE_ART):
-			unsigned char ans = conn.read();
-			if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				cout<<"Article added"<<endl;
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}
-		break;
-		case static_cast<int>(Protocol::ANS_DELETE_ART):
-			unsigned char ans = conn.read();
-			if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				cout<<"Article deleted"<<endl;
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}
-		break;
-		case static_cast<int>(Protocol::ANS_GET_ART:
-			unsigned char ans = conn.read();
-			if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
-				string title = readString(conn);
-				string author = readString(conn);
-				string text = readString(conn);
-				cout<<"TITLE: "<<title<<endl<<"AUTHOR: "<<author<<endl<<text<<endl;
-			}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
-				printError(conn);
-			}
-		break;
+		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+			printError(conn);
+		}
+	}
+	else if(com_num ==static_cast<int>(Protocol::ANS_CREATE_ART)){
+		unsigned char ans = conn.read();
+		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+			cout<<"Article added"<<endl;
+		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+			printError(conn);
+		}
+	}
+	else if(com_num ==static_cast<int>(Protocol::ANS_DELETE_ART)){
+		unsigned char ans = conn.read();
+		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+			cout<<"Article deleted"<<endl;
+		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+			printError(conn);
+		}
+	}
+	else if(com_num ==static_cast<int>(Protocol::ANS_GET_ART)){
+		unsigned char ans = conn.read();
+		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
+			string title = readString(conn);
+			string author = readString(conn);
+			string text = readString(conn);
+			cout<<"TITLE: "<<title<<endl<<"AUTHOR: "<<author<<endl<<text<<endl;
+		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
+			printError(conn);
+		}
 	}
 	//remove ANS_END
 	conn.read();
@@ -174,14 +170,14 @@ void read(const Connection& conn){
 void printError(const Connection& conn){
 	cout<<"ERROR: ";
         unsigned char err = conn.read();
-	switch(err):
-		case static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS):
+	switch(err)){
+		else if(com_num ==static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS)){
 			cout<<"News group already exists"<<endl;
-		break;
-		case static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST):
+		}
+		else if(com_num ==static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)){
 			cout<<"News group does not exist"<<endl;
-		break;
-		case static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST):
+		}
+		else if(com_num ==static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST)){
 			cout<<"Article does not exist"<<endl;
 }
 
@@ -259,7 +255,7 @@ int app(const Connection& conn){
 
 			}else{
 				write(conn, nbr);
-				read();
+				read(conn);
 			}
                         cout << "Type another number: ";
                 } catch (ConnectionClosedException&) {
