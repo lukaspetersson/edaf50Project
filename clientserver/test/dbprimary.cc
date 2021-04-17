@@ -53,17 +53,21 @@ bool ArticleDatabasePrimary::create_newsgroup(const std::string& name) {
 }
 
 const Article ArticleDatabasePrimary::get_article(unsigned int newsgroup_id, unsigned int article_id, int& failstate) {
+    Article a;
+
     auto it1 = find_if(db.begin(), db.end(), [newsgroup_id](const Newsgroup& n){return n.id == newsgroup_id;});
 
     if(it1 == db.end()) {
         failstate = 1;
         cout << "ERROR: Newsgroup with id " << newsgroup_id << " not found!" << endl;
+        return a;
     }
     auto it2 = find_if(it1->articles.begin(), it1->articles.end(), [article_id](const Article& a){return a.id == article_id;});
 
     if(it2 == it1->articles.end()) {
         failstate = 2;
         cout << "ERROR: Article with id " << article_id << " not found in newsgroup with id " << newsgroup_id << '!' << endl;
+        return a;
     }
 
     return *it2;

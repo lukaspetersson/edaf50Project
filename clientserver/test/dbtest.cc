@@ -16,13 +16,19 @@ void test_primary_db() {
 
     Article a1("a1", "Alice", "Hello world!");
 
-    int failsafe = 0;
+    int failstate = 0;
 
     success &= db.store_article(a1, 1);
     success &= db.store_article(a1, 2);
 
-    success &= db.delete_article(2, 4, failsafe);
-    success &= !failsafe;
+    success &= db.delete_article(2, 4, failstate);
+    success &= !failstate;
+
+    success &= !db.delete_article(7, 6, failstate);
+    success &= failstate == 1;
+
+    success &= !db.delete_article(2, 4, failstate);
+    success &= failstate == 2; 
 
     success &= db.list_articles(2).size() == 0;
 
@@ -31,9 +37,17 @@ void test_primary_db() {
     success &= db.delete_newsgroup(2);
     success &= db.list_newsgroups().size() == 1;
     
-    failsafe = 0;
-    success &= db.get_article(1, 3, failsafe).id == 3;
-    success &= !failsafe;
+    
+    failstate = 0;
+    success &= db.get_article(1, 3, failstate).id == 3;
+    success &= !failstate;
+    
+    db.get_article(7, 6, failstate);
+    success &= failstate == 1;
+
+    db.get_article(1, 100, failstate);
+    success &= failstate == 2;
+    
 
     if(success) {
         cout << "Primary database tests passed" << endl;
@@ -75,6 +89,13 @@ void test_disk_db() {
     success &= ars[0].title =="a1";
     success &= ars[1].id == 7;
 
+    success &= !db.delete_article(7, 6, failstate);
+    success &= failstate == 1;
+
+    success &= !db.delete_article(4, 100, failstate);
+    success &= failstate == 2;
+
+    failstate = 0;
     success &= db.delete_article(4, 6, failstate);
     success &= !failstate;
     success &= db.list_articles(4).size() == 1;
@@ -90,6 +111,12 @@ void test_disk_db() {
 
     success &= atest.title == "a2" && atest.id == 9;
     success &= !failstate;
+
+    db.get_article(7, 6, failstate);
+    success &= failstate == 1;
+
+    db.get_article(4, 100, failstate);
+    success &= failstate == 2;
 
     success &= db.delete_newsgroup(ngs2[0].id);
     success &= db.list_newsgroups().size() == 1;

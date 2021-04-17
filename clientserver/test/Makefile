@@ -24,14 +24,14 @@ LDFLAGS   = -g -L..
 LDLIBS = -lclientserver
 
 # Targets
-PROGS = myserver myclient testarticle dbtest
+PROGS = myclient myserver testarticle dbtest
 
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
 # The dependency on libclientserver.a is not defined.
-myserver: myserver.o
 myclient: myclient.o
+myserver: myserver.o
 testarticle: testarticle.o
 dbtest: dbtest.o dbprimary.o dbdisk.o
 
