@@ -8,10 +8,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <limits>
 
 using namespace std;
 
 void write(const Connection& conn, int com_num){
+	cin.ignore(numeric_limits<streamsize>::max(),'\n');
 	//write commandbyte
 	conn.write(com_num & 0xFF);
 	//write parameter
@@ -22,6 +24,7 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_CREATE_NG)){
 	    //create new newsgroup
 	    //parameter: string title
+	    cout<<"Type title"<<endl;
 	    string title;
 	    getline(cin, title);
 	    writeString(conn, title);
@@ -29,6 +32,7 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_DELETE_NG)){
 	    //delete newsgroup
 	    //parameter: int ID
+	    cout<<"Type ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
@@ -36,6 +40,7 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_LIST_ART)){
 	    //list articles
 	    //parameter: int ID
+	    cout<<"Type ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
@@ -43,32 +48,40 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_CREATE_ART)){
 	    //create article
 	    //parameters: int ID, string title, string author, string text
+	    cout<<"Type ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
+	    cout<<"Type title"<<endl;
 	    string line;
 	    getline(cin, line);
 	    writeString(conn, line);
+	    cout<<"Type author"<<endl;
 	    getline(cin, line);
 	    writeString(conn, line);
+	    cout<<"Type text"<<endl;
 	    getline(cin, line);
 	    writeString(conn,line);
 	}
 	else if(com_num ==static_cast<int>(Protocol::COM_DELETE_ART)){
 	    //delete article
 	    //parameters: int ID, int ID
+	    cout<<"Type newsgroup ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
+	    cout<<"Type article ID"<<endl;
 	    cin >> id;
 	    writeNumber(conn, id);
 	}
 	else if(com_num ==static_cast<int>(Protocol::COM_GET_ART)){
 	    //get article
 	    //parameters: int ID, int ID
+	    cout<<"Type newsgroup ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
+	    cout<<"Type article ID"<<endl;
 	    cin >> id;
 	    writeNumber(conn, id);
 	}
