@@ -117,10 +117,10 @@ Server init(int argc, char* argv[])
 	void listArticles(ArticleDatabase& db, const shared_ptr<Connection>& conn){
 		 auto newsgroupID = readNumber(*conn);
 		 sendCode(*conn,Protocol::ANS_LIST_ART);
-		 int failstate = 0;
+		 bool fail = true;
 		
-		auto articles = db.list_articles(newsgroupID, failstate);
-		if(failstate){
+		auto articles = db.list_articles(newsgroupID, fail);
+		if(!fail){
 			sendCode(*conn,Protocol::ANS_ACK);
 
 			for (auto& article : articles) {

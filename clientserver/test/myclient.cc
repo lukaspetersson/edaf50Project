@@ -33,7 +33,7 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_DELETE_NG)){
 	    //delete newsgroup
 	    //parameter: int ID
-	    cout<<"Type ID"<<endl;
+	    cout<<"Type newsgroup ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
@@ -41,7 +41,7 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_LIST_ART)){
 	    //list articles
 	    //parameter: int ID
-	    cout<<"Type ID"<<endl;
+	    cout<<"Type newsgroup ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
@@ -49,15 +49,17 @@ void write(const Connection& conn, int com_num){
 	else if(com_num ==static_cast<int>(Protocol::COM_CREATE_ART)){
 	    //create article
 	    //parameters: int ID, string title, string author, string text
-	    cout<<"Type ID"<<endl;
+	    cout<<"Type newsgroup ID"<<endl;
 	    int id;
 	    cin >> id;
 	    writeNumber(conn, id);
 	    cout<<"Type title"<<endl;
 	    string line;
+	    cin.ignore();
 	    getline(cin, line);
 	    writeString(conn, line);
 	    cout<<"Type author"<<endl;
+	    cin.ignore();
 	    getline(cin, line);
 	    writeString(conn, line);
 	    cout<<"Type text"<<endl;
@@ -118,7 +120,8 @@ void read(const Connection& conn){
 		for(int i = 0; i != num_ng; i++){
 			int id = readNumber(conn);
 			string title = readString(conn);
-			cout<<"ID: "<<id<<", TITLE: "<<(title.substr(8))<<endl;
+			cout.ignore();
+			cout<<"ID: "<<id<<", TITLE: "<<(title)<<endl;
 		}	
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_CREATE_NG)){
