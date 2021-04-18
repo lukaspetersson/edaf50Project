@@ -175,16 +175,16 @@ Server init(int argc, char* argv[])
 
 	}
 
-	/*
+	
 	void writeArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
 		int newsgroupID = readNumber(*conn);
 		string title = readString(*conn);
 		string author = readString(*conn);
-		string content= readString(*conn),
+		string content= readString(*conn);
 	       
-	    Article newart(title, author, content) 
+	    Article newart(title, author, content);
 		sendCode(*conn,Protocol::ANS_CREATE_ART);
-		bool ans = db.store_article(newart, newsgroupID )
+		bool ans = db.store_article(newart, newsgroupID );
 		if(ans){ 
 			sendCode(*conn,Protocol::ANS_ACK);
 			
@@ -194,7 +194,7 @@ Server init(int argc, char* argv[])
 		}
 		sendCode(*conn,Protocol::ANS_END);
 	}
-*/
+
 
 	void deleteArticle(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
 		 auto newsgroupID = readNumber(*conn);
@@ -220,7 +220,7 @@ Server init(int argc, char* argv[])
 
 
 
-//TODO
+
 int main(int argc, char* argv[]){
 
 
