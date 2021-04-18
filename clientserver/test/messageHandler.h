@@ -60,6 +60,7 @@ void writeString(const Connection& conn, string s){
 	    conn.write((len >> 8) & 0xFF);
 	    conn.write(len & 0xFF);
 	    for(char c : s)conn.write(c);
+	    conn.write('$');
 }
 // write string_p
 void writeString(const shared_ptr<Connection>& conn, string s){

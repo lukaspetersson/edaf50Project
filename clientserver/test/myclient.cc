@@ -13,6 +13,7 @@
 using namespace std;
 
 void write(const Connection& conn, int com_num){
+
 	cin.ignore(numeric_limits<streamsize>::max(),'\n');
 	//write commandbyte
 	conn.write(com_num & 0xFF);
@@ -111,17 +112,18 @@ void writeNumber(conn, const Connection& conn, int value){
 }
 */
 void read(const Connection& conn){
-	unsigned char com_num{conn.read()};
+	int com_num = conn.read();
 	if(com_num ==static_cast<int>(Protocol::ANS_LIST_NG)){
 		int num_ng = readNumber(conn);
 		for(int i = 0; i != num_ng; i++){
 			int id = readNumber(conn);
 			string title = readString(conn);
-			cout<<"ID: "<<id<<", TITLE: "<<title<<endl;
+			cout<<"ID: "<<id<<", TITLE: "<<(title.substr(8))<<endl;
 		}	
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_CREATE_NG)){
-		unsigned char ans = conn.read();
+
+		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			cout<<"News group added"<<endl;
 		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){

@@ -117,9 +117,10 @@ Server init(int argc, char* argv[])
 	void listArticles(ArticleDatabase& db, const shared_ptr<Connection>& conn){
 		 auto newsgroupID = readNumber(*conn);
 		 sendCode(*conn,Protocol::ANS_LIST_ART);
+		 int failstate = 0;
 		
-		auto articles = db.list_articles(newsgroupID);
-		if(articles.size() != 0){
+		auto articles = db.list_articles(newsgroupID, failstate);
+		if(failstate){
 			sendCode(*conn,Protocol::ANS_ACK);
 
 			for (auto& article : articles) {
@@ -161,9 +162,9 @@ Server init(int argc, char* argv[])
 
 
 	void createNewsgroup(ArticleDatabase& db,  const shared_ptr<Connection>& conn){
-		sendCode(*conn,Protocol::ANS_CREATE_NG);
 	      auto title = readString(*conn);
 		bool ans = db.create_newsgroup(title);
+		sendCode(*conn,Protocol::ANS_CREATE_NG);
 		if(ans){
 			sendCode(*conn,Protocol::ANS_ACK);
 
@@ -232,7 +233,7 @@ int main(int argc, char* argv[]){
                 auto conn = server.waitForActivity();
                 if (conn != nullptr) {
                         try {
-                                        int  code = readNumber(*conn);
+                                        int  code = conn->read();
                                 
                                 switch (code) {
                                 case static_cast<int>(Protocol::COM_LIST_NG)   : 
@@ -254,6 +255,8 @@ int main(int argc, char* argv[]){
                                 
                         
                                         }
+				//remove com_end
+				conn->read();
 
                                                 }catch(ConnectionClosedException&) {
                                 server.deregisterConnection(conn);
