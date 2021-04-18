@@ -31,7 +31,10 @@ void test_primary_db() {
     success &= !db.delete_article(2, 4, failstate);
     success &= failstate == 2; 
 
-    success &= db.list_articles(2).size() == 0;
+    bool fail = true;
+    success &= db.list_articles(2, fail).size() == 0;
+
+    success &= !fail;
 
     success &= db.list_newsgroups().size() == 2;
     success &= db.list_newsgroups()[0].id == 1;
@@ -85,28 +88,32 @@ void test_disk_db() {
     success &= db.store_article(a2, 4);
     success &= db.store_article(a1, 5);
 
-    const std::vector<Article>& ars = db.list_articles(4);
-
+    bool fail = true;
+    const std::vector<Article>& ars = db.list_articles(4, fail);
+    
     success &= ars[0].title =="a1";
     success &= ars[1].id == 7;
-
+    
     success &= !db.delete_article(7, 6, failstate);
     success &= failstate == 1;
-
+    
     success &= !db.delete_article(4, 100, failstate);
     success &= failstate == 2;
-
+    
+    fail = true;
     failstate = 0;
     success &= db.delete_article(4, 6, failstate);
     success &= !failstate;
-    success &= db.list_articles(4).size() == 1;
+    success &= db.list_articles(4, fail).size() == 1;
+
+    success &= !fail;
 
     success &= db.store_article(a2, 5);
     success &= db.store_article(a1, 5);
     success &= db.store_article(a2, 5);
 
     const std::vector<Newsgroup>& ngs2 = db.list_newsgroups();
-    const std::vector<Article>& ars2 = db.list_articles(ngs2[1].id);
+    const std::vector<Article>& ars2 = db.list_articles(ngs2[1].id, fail);
     failstate = 0;
     Article atest = db.get_article(ngs2[1].id, ars2[1].id, failstate);
 

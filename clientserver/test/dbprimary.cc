@@ -96,11 +96,13 @@ bool ArticleDatabasePrimary::delete_article(unsigned int newsgroup_id, unsigned 
     return true;
 }
 
-const std::vector<Article> ArticleDatabasePrimary::list_articles(unsigned int newsgroup_id) {
+const std::vector<Article> ArticleDatabasePrimary::list_articles(unsigned int newsgroup_id, bool& fail) {
     auto it1 = find_if(db.begin(), db.end(), [newsgroup_id](const Newsgroup& n){return n.id == newsgroup_id;});
 
     if(it1 == db.end()) {
         cout << "ERROR: Newsgroup with id " << newsgroup_id << " not found!" << endl;
+    } else {
+        fail = false;
     }
 
     Newsgroup res = static_cast<Newsgroup>(*it1);

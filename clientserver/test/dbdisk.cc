@@ -157,13 +157,32 @@ bool ArticleDatabaseDisk::delete_article(unsigned int newsgroup_id, unsigned int
     return success;
 }
 
-const std::vector<Article> ArticleDatabaseDisk::list_articles(unsigned int newsgroup_id) { //Make return reference
+const std::vector<Article> ArticleDatabaseDisk::list_articles(unsigned int newsgroup_id, bool& fail) { //Make return reference
     std::vector<Article> articles;
-    fstream ar_db;
+    fstream ar_db, ng_db;
     std::stringstream ss;
-    ar_db.open(ar_file, fstream::in);
     Article a;
     std::string s;
+
+    ar_db.open(ar_file, fstream::in);
+    ng_db.open(ng_file, fstream::in);
+    
+    while(!ng_db.eof()) {
+        s = read_field(ng_db);
+        ss << s;
+        unsigned int ng_id = 0;
+        ss >> ng_id;
+        ss.clear();
+
+        if(ng_id == newsgroup_id) {
+            fail = false;
+        }
+        getline(ng_db, s);
+    }
+    
+    ss.str("");
+    ss.clear();
+    s = "";
 
     while(!ar_db.eof()) {
         s = read_field(ar_db);
