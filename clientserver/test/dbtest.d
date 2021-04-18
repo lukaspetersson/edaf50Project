@@ -1,9 +1,9 @@
-dbtest.o: dbtest.cc dbprimary.h dbinterface.h article.h dbdisk.h
-
-dbprimary.h:
+dbtest.o: dbtest.cc dbinterface.h article.h dbprimary.h dbdisk.h
 
 dbinterface.h:
 
 article.h:
+
+dbprimary.h:
 
 dbdisk.h:

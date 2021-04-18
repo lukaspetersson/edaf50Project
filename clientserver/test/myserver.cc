@@ -219,48 +219,47 @@ Server init(int argc, char* argv[])
 }
 
 
-
-
 int main(int argc, char* argv[]){
 
 
-   auto server = init(argc, argv);
+        auto server = init(argc, argv);
+        
 
-   ArticleDatabasePrimary db;
-   
+        ArticleDatabasePrimary dbp;
+        ArticleDatabase& db = dbp;
 
         while (true) {
                 auto conn = server.waitForActivity();
                 if (conn != nullptr) {
                         try {
-                                 int  code = readNumber(*conn);
+                                        int  code = readNumber(*conn);
                                 
                                 switch (code) {
                                 case static_cast<int>(Protocol::COM_LIST_NG)   : 
-			                listNewsgroups(db, conn); break;
+                                        listNewsgroups(db, conn); break;
                                 case static_cast<int>(Protocol::COM_CREATE_NG) :
-			                createNewsgroup(db, conn); break;
+                                        createNewsgroup(db, conn); break;
                                 case static_cast<int>(Protocol::COM_DELETE_NG) : 
-			                deleteNewsgroup(db, conn); break;
+                                        deleteNewsgroup(db, conn); break;
                                 case static_cast<int>(Protocol::COM_LIST_ART)  : 
-			                listArticles(db, conn); break;
+                                        listArticles(db, conn); break;
                                 case static_cast<int>(Protocol::COM_CREATE_ART):
-			                 writeArticle(db, conn); break;
+                                                writeArticle(db, conn); break;
                                 case static_cast<int>(Protocol::COM_DELETE_ART):
-			                 deleteArticle(db, conn); break;
+                                                deleteArticle(db, conn); break;
                                 case static_cast<int>(Protocol::COM_GET_ART)   :
-			                 readArticle(db, conn); break;
-		                 default: 
-								throw ConnectionClosedException();
+                                                readArticle(db, conn); break;
+                                        default: 
+                                                                throw ConnectionClosedException();
                                 
                         
-                			}
+                                        }
 
-						}catch(ConnectionClosedException&) {
+                                                }catch(ConnectionClosedException&) {
                                 server.deregisterConnection(conn);
                                 cout << "Client closed connection" << endl;
                         }
-				}else{
+                                }else{
                         conn = make_shared<Connection>();
                         server.registerConnection(conn);
                         cout << "New client connects" << endl;

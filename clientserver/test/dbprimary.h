@@ -11,7 +11,7 @@ which in turn contain a vector of articles.
 */
 class ArticleDatabasePrimary : public ArticleDatabase {
     public:
-
+        
         //Takes an article reference and stores it in a vector of newsgroups, return true if success else false
         bool store_article(Article& article, unsigned int newsgroup_id);
 

@@ -12,7 +12,7 @@ struct Newsgroup {
 
 class ArticleDatabase {
     public:
-
+        
         //Takes an article reference and stores it in some form, return true if success else false
         virtual bool store_article(Article& article, unsigned int newsgroup_id) = 0;
 

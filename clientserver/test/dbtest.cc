@@ -1,4 +1,5 @@
 #include <iostream>
+#include "dbinterface.h"
 #include "dbprimary.h"
 #include "dbdisk.h"
 
