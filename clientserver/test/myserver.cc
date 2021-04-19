@@ -123,9 +123,10 @@ int readNumber(const shared_ptr<Connection>& conn)
 			if(!fail){
 				sendCode(*conn,Protocol::ANS_ACK);
 
+				    writeNumber(*conn,articles.size());
+
 				for (auto& article : articles) {
 				    writeNumber(*conn,article.id);
-				    cout<<article.title<<article.id<<"QQQQQ"<<endl;
 				    writeString(*conn, article.title);
 				}
 			}else{

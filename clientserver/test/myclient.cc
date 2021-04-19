@@ -91,27 +91,6 @@ void write(const Connection& conn, int com_num){
 	conn.write(static_cast<int>(Protocol::COM_END) & 0xFF);
 
 }
-/*
-// write string_p
-void writeString(const Connection& conn, string s){
-	    conn.write(static_cast<int>(Protocol::PAR_STRING));
-	    int len = s.size();
-            conn.write((len >> 24) & 0xFF);
-            conn.write((len >> 16) & 0xFF);
-	    conn.write((len >> 8) & 0xFF);
-	    conn.write(len & 0xFF);
-	    for(char c : s)conn.write(c);
-}
-
-// write num_p
-void writeNumber(conn, const Connection& conn, int value){
-	conn.write(static_cast<int>(Protocol::PAR_NUM));
-        conn.write((value >> 24) & 0xFF);
-        conn.write((value >> 16) & 0xFF);
-        conn.write((value >> 8) & 0xFF);
-        conn.write(value & 0xFF);
-}
-*/
 void read(const Connection& conn){
 	int com_num = conn.read();
 	if(com_num ==static_cast<int>(Protocol::ANS_LIST_NG)){
@@ -143,13 +122,9 @@ void read(const Connection& conn){
 		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			int num_art = readNumber(conn);
-		cout<<"UUUUUUUUU"<<num_art<<endl;
 			for(int i = 0; i != num_art; i++){
-				cout<<"YYYY"<<endl;
 				int id = readNumber(conn);
-			cout<<"OOOO"<<id<<endl;
 				string title = readString(conn);
-				cout<<"RRRRR"<<endl;
 				cout<<"ID: "<<id<<", TITLE: "<<title<<endl;
 			}	
 		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
@@ -186,47 +161,6 @@ void read(const Connection& conn){
 	//remove ANS_END
 	conn.read();
 }
-/*
-void printError(const Connection& conn){
-	cout<<"ERROR: ";
-        unsigned char err = conn.read();
-	switch(err)){
-		else if(com_num ==static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS)){
-			cout<<"News group already exists"<<endl;
-		}
-		else if(com_num ==static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)){
-			cout<<"News group does not exist"<<endl;
-		}
-		else if(com_num ==static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST)){
-			cout<<"Article does not exist"<<endl;
-}
-
-//read num_p
-int readNumber(const Connection& conn){
-	//remove PAR_NUM
-	conn.read();
-
-	//read number
-        unsigned char byte1 = conn.read();
-        unsigned char byte2 = conn.read();
-        unsigned char byte3 = conn.read();
-        unsigned char byte4 = conn.read();
-        return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-}
-
-//read string_p
-string readString(const Connection& conn){
-	//remove PAR_STRING
-	conn.read();
-
-        string s;
-        char   c;
-        while ((c = conn.read()) != '$') {
-                s += c;
-        }
-        return s;
-}
-*/
 /* Creates a client for the given args, if possible.
  * Otherwise exits with error code.
  */

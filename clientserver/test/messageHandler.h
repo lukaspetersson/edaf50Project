@@ -41,21 +41,19 @@ int readNumber(const Connection& conn){
 //read string_p
 string readString(const Connection& conn){
 	//remove PAR_STRING
-	cout<<conn.read()<<endl;
+	conn.read()
 	
         unsigned char byte1 = conn.read();
         unsigned char byte2 = conn.read();
         unsigned char byte3 = conn.read();
         unsigned char byte4 = conn.read();
         int len = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-	cout<<"TRTTT"<<len<<endl;
         string s;
 
         char c;
 	for(int i = 0; i != len; i++){
 		c = conn.read();
 		s+=c;
-		cout<<i<<endl;
 	}	
         return s;
 }
@@ -64,7 +62,6 @@ string readString(const Connection& conn){
 void writeString(const Connection& conn, string s){
 	    conn.write(static_cast<char>(Protocol::PAR_STRING));
 	    unsigned int len = s.size();
-	    cout<<"CCCCCCC"<<len<<endl;
             conn.write((len >> 24) & 0xFF);
             conn.write((len >> 16) & 0xFF);
 	    conn.write((len >> 8) & 0xFF);
