@@ -41,26 +41,35 @@ int readNumber(const Connection& conn){
 //read string_p
 string readString(const Connection& conn){
 	//remove PAR_STRING
-	conn.read();
-
+	cout<<conn.read()<<endl;
+	
+        unsigned char byte1 = conn.read();
+        unsigned char byte2 = conn.read();
+        unsigned char byte3 = conn.read();
+        unsigned char byte4 = conn.read();
+        int len = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
+	cout<<"TRTTT"<<len<<endl;
         string s;
-        char   c;
-        while ((c = conn.read()) != '$') {
-                s += c;
-        }
+
+        char c;
+	for(int i = 0; i != len; i++){
+		c = conn.read();
+		s+=c;
+		cout<<i<<endl;
+	}	
         return s;
 }
 
 // write string_p
 void writeString(const Connection& conn, string s){
-	    conn.write(static_cast<int>(Protocol::PAR_STRING));
-	    int len = s.size();
+	    conn.write(static_cast<char>(Protocol::PAR_STRING));
+	    unsigned int len = s.size();
+	    cout<<"CCCCCCC"<<len<<endl;
             conn.write((len >> 24) & 0xFF);
             conn.write((len >> 16) & 0xFF);
 	    conn.write((len >> 8) & 0xFF);
 	    conn.write(len & 0xFF);
 	    for(char c : s)conn.write(c);
-	    conn.write('$');
 }
 // write string_p
 void writeString(const shared_ptr<Connection>& conn, string s){
@@ -69,7 +78,8 @@ void writeString(const shared_ptr<Connection>& conn, string s){
 
 // write num_p
 void writeNumber(const Connection& conn, int value){
-	conn.write(static_cast<int>(Protocol::PAR_NUM));
+	cout<<"AAAAAAAA"<<value<<endl;
+	conn.write(static_cast<char>(Protocol::PAR_NUM));
         conn.write((value >> 24) & 0xFF);
         conn.write((value >> 16) & 0xFF);
         conn.write((value >> 8) & 0xFF);

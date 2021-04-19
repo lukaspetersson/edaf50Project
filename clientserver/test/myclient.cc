@@ -59,7 +59,6 @@ void write(const Connection& conn, int com_num){
 	    getline(cin, line);
 	    writeString(conn, line);
 	    cout<<"Type author"<<endl;
-	    cin.ignore();
 	    getline(cin, line);
 	    writeString(conn, line);
 	    cout<<"Type text"<<endl;
@@ -120,7 +119,6 @@ void read(const Connection& conn){
 		for(int i = 0; i != num_ng; i++){
 			int id = readNumber(conn);
 			string title = readString(conn);
-			cout.ignore();
 			cout<<"ID: "<<id<<", TITLE: "<<(title)<<endl;
 		}	
 	}
@@ -134,7 +132,7 @@ void read(const Connection& conn){
 		}
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_DELETE_NG)){
-		unsigned char ans = conn.read();
+		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			cout<<"News group deleted"<<endl;
 		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
@@ -142,12 +140,16 @@ void read(const Connection& conn){
 		}
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_LIST_ART)){
-		unsigned char ans = conn.read();
+		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			int num_art = readNumber(conn);
+		cout<<"UUUUUUUUU"<<num_art<<endl;
 			for(int i = 0; i != num_art; i++){
+				cout<<"YYYY"<<endl;
 				int id = readNumber(conn);
+			cout<<"OOOO"<<id<<endl;
 				string title = readString(conn);
+				cout<<"RRRRR"<<endl;
 				cout<<"ID: "<<id<<", TITLE: "<<title<<endl;
 			}	
 		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
@@ -155,7 +157,7 @@ void read(const Connection& conn){
 		}
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_CREATE_ART)){
-		unsigned char ans = conn.read();
+		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			cout<<"Article added"<<endl;
 		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
@@ -163,7 +165,7 @@ void read(const Connection& conn){
 		}
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_DELETE_ART)){
-		unsigned char ans = conn.read();
+		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			cout<<"Article deleted"<<endl;
 		}else if(ans == static_cast<int>(Protocol::ANS_NAK)){
@@ -171,7 +173,7 @@ void read(const Connection& conn){
 		}
 	}
 	else if(com_num ==static_cast<int>(Protocol::ANS_GET_ART)){
-		unsigned char ans = conn.read();
+		int ans = conn.read();
 		if(ans == static_cast<int>(Protocol::ANS_ACK)){ 
 			string title = readString(conn);
 			string author = readString(conn);
