@@ -41,7 +41,7 @@ int readNumber(const Connection& conn){
 //read string_p
 string readString(const Connection& conn){
 	//remove PAR_STRING
-	conn.read()
+	conn.read();
 	
         unsigned char byte1 = conn.read();
         unsigned char byte2 = conn.read();
@@ -75,7 +75,6 @@ void writeString(const shared_ptr<Connection>& conn, string s){
 
 // write num_p
 void writeNumber(const Connection& conn, int value){
-	cout<<"AAAAAAAA"<<value<<endl;
 	conn.write(static_cast<char>(Protocol::PAR_NUM));
         conn.write((value >> 24) & 0xFF);
         conn.write((value >> 16) & 0xFF);
